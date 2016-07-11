@@ -1,0 +1,132 @@
+package coj3551;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.text.DecimalFormat;
+import java.util.StringTokenizer;
+
+public class Main {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		InputStream inputStream = System.in;
+        OutputStream outputStream = System.out;
+        InputReader in = new InputReader( inputStream );
+        PrintWriter out = new PrintWriter( outputStream );
+        
+        int N = in.nextInt();
+        for( ; N > 0; --N ){
+        	double r = in.nextDouble();
+        	double k = in.nextDouble();
+        	Task tsk = new Task( r, k );
+        	DecimalFormat df = new DecimalFormat();
+        	df.setMinimumFractionDigits(5);
+        	df.setMaximumFractionDigits( 5 );
+        	Point pt1 = tsk._solve();
+        	long x1 = (long) ( pt1.x * 100000 );
+        	long y1 = (long) ( pt1.y * 100000 );
+        	out.println( df.format( x1 / 100000.0 ).replace(',', '.') + " " + df.format( y1 / 100000.0 ).replace(',', '.') );
+        }
+        out.close();
+	}
+	
+	static class Point{
+		
+		public double x;
+		public double y;
+		
+		Point( double x, double y ){
+			this.x = x;
+			this.y = y;
+		}
+	}
+	
+	static class Task {
+		
+		double R;
+		double K;
+		double x;
+		double y;
+		
+		public Task( double R, double K ){
+			this.R = R;
+			this.K = K;
+		}
+		
+		private double f( double a, double _x, double _y ){
+			double tx = x * Math.cos( a ) - y * Math.sin( a );
+			double ty = x * Math.sin( a ) + y * Math.cos( a );
+			double hip = Math.sqrt( ( tx - R )*( tx - R ) + ty * ty );
+			double ct = R * Math.sin( a );
+			double area = Math.toDegrees( a ) * Math.PI * R * R / 360.0;
+			double n_area = area - hip * ct / 2.0;
+			double m_area = 1.0 * R * R * Math.PI - n_area;
+			return n_area / m_area;
+		}
+		
+		public Point _solve(){
+			
+			double l = 0;
+			double r = Math.PI;
+			x = R;
+			y = 0;
+			for( int i = 0; i < 300; ++i ){
+				double m1 = l + ( r - l ) / 3;
+				double m2 = r - ( r - l ) / 3;
+				if( Math.abs( f( m2, x, y ) - K ) - Math.abs( f( m1, x, y )  - K ) >= 1e-10 )
+					r = m2;
+				else
+					l = m1;
+			}
+			
+			x = R * Math.cos( l );
+			y = R * Math.sin( l );
+			
+			if( Math.abs( x ) <= 1e-10 )
+				x = Math.abs( x );
+			
+			if( Math.abs( y ) <= 1e-10 )
+				y = Math.abs( y );	
+			
+			return new Point( x, y );
+		}
+	}
+	
+	static class InputReader {
+        public BufferedReader reader;
+        public StringTokenizer tokenizer;
+
+        public InputReader(InputStream stream) {
+            reader = new BufferedReader(new InputStreamReader(stream), 32768);
+            tokenizer = null;
+        }
+
+        public String next() {
+            while (tokenizer == null || !tokenizer.hasMoreTokens()) {
+                try {
+                    tokenizer = new StringTokenizer(reader.readLine());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            return tokenizer.nextToken();
+        }
+
+        public int nextInt() {
+            return Integer.parseInt(next());
+        }
+
+        public long nextLong() {
+            return Long.parseLong(next());
+        }
+        
+        public double nextDouble() {
+        	return Double.parseDouble( next() );
+        }
+
+	}
+}
